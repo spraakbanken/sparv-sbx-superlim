@@ -1,0 +1,14 @@
+[project]
+name = "sparv-sbx-superlim"
+version = "0.1.0"
+description = "A Sparv plugin for classifying text using the Superlim baseline models "
+readme = "README.md"
+license.text = "The GNU General Public License v3.0"
+ authors = [
+     { name = "Felix Morger", email = "felix.morger@gu.se" }
+ ]
+dependencies = [
+    "sparv-pipeline~=5.0",
+    "transformers~=4.41.2"
+]
+entry-points."sparv.plugin" = { sbx_superlim = "sbx_superlim" }
