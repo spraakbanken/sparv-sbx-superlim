@@ -9,6 +9,7 @@ license.text = "The GNU General Public License v3.0"
  ]
 dependencies = [
     "sparv-pipeline~=5.0",
-    "transformers~=4.41.2"
+    "transformers~=4.41.2",
+    "datasets~=2.20.0"
 ]
 entry-points."sparv.plugin" = { sbx_superlim = "sbx_superlim" }
