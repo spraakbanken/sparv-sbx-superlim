@@ -2,7 +2,7 @@
 
 from typing import List, Literal
 
-
+from datasets import get_dataset_config_info
 from sparv.api import Annotation, Config, Output, annotator
 from transformers import pipeline
 
@@ -15,18 +15,29 @@ from .helpers import get_label_mapper
 )
 def argumentation(
     sentence: Annotation = Annotation("<sentence>"),
+    word: Annotation = Annotation("<token:word>"),
     out_stance: Output = Output("<sentence>:sbx_superlim.argumentation.stance"),
     out_stance_certainty: Output = Output("<sentence>:sbx_superlim.argumentation.certainty"),
+    hf_model_path: str = "sbx/bert-base-swedish-cased-argumentation_sent",
     # TODO: figure out how to pass this as an argument
-    hf_model_path: str = "sbx/bert-base-swedish-cased-argumentation_sent"
-):
-    # TODO: Add as argument and automatically fetch allowed topics from from HF
     topic : List[Literal['abort', 'minimilön', 'marijuanalegalisering', 'dödsstraff', 'kärnkraft', 'kloning']] = 'abort'
-    # TODO: Run in batches
+):
+    ds_config = get_dataset_config_info('sbx/superlim-2', 'argumentation_sent')
+    inputs = []
+    sentences, _orphans = sentence.get_children(word)
+    token_word = list(word.read())
+    inputs : List[str] = []
+    for s in sentences:
+        s_words = []
+        for w_idx in s:
+            s_words.append(token_word[w_idx])
+        sentence_string = " ".join(s_words)
+        # TODO: Temporary string formatting hack until training scripts and models are fixed
+        input_string = f"{sentence_string} $ {topic}"
+        inputs.append(input_string)
     pipe = pipeline("text-classification", model=hf_model_path)
-    # TODO: Temporary string formatting hack until training scripts and models are fixed
-    output = pipe([f"{s} $ {topic}" for s in sentence.read()])
-    label_mapper = get_label_mapper("argumentation_sent", pipe.model.config)
+    output = pipe(inputs)
+    label_mapper = get_label_mapper(ds_config, pipe.model.config)
     labels = [label_mapper[o['label']] for o in output]
     out_stance.write([f"{topic}.{l}" for l in labels])
     out_stance_certainty.write([str(o['score']) for o in output])
@@ -44,22 +55,25 @@ def absabank_imm(
     output = pipe([s for s in sentence.read()])
     out_sentiment.write([l for l in output['label']])
     out_sentiment_certainty.write([str(o['score']) for o in output])
-    
 
 
-@annotator("Determine whether a sentence is correct Swedish or not")
+@annotator(
+        "Determine whether a sentence is correct Swedish or not", 
+        language="swe"
+)
 def dalaj_ged(
     sentence: Annotation = Annotation("<sentence>"),
     out_label : Output = Output("<sentence>:sbx_superlim.dalaj-ged.label"),
     out_certainty: Output = Output("<sentence>:sbx_superlim.dalaj-ged.certainty"),
     hf_model_path: str = "sbx/bert-base-swedish-cased_dalaj-ged"
 ):  
+    input = [s for s in sentence.read()]
     pipe = pipeline("text-classification", model=hf_model_path)
-    output = pipe([s for s in sentence.read()])
+    output = pipe(input)
     label_mapper = get_label_mapper("dalaj-ged", pipe.model.config)
     labels = [label_mapper[o['label']] for o in output]
     out_label.write(labels)
-    out_certainty.write([str(o['score']) for o in output])    
+    out_certainty.write([str(o['score']) for o in output])
 
 
 @annotator("Determine how related two words are on a continuous scale from 0 to 10")
