@@ -17,7 +17,7 @@ def argumentation(
     word: Annotation = Annotation("<token:word>"),
     out_stance: Output = Output("<sentence>:sbx_superlim.argumentation.stance"),
     out_stance_certainty: Output = Output("<sentence>:sbx_superlim.argumentation.certainty"),
-    hf_model_path: str = "sbx/bert-base-swedish-cased-argumentation_sent"
+    hf_model_path: str = "sbx/bert-base-swedish-cased_argumentation_sent"
 ):
     # TODO: figure out how to pass this as an argument
     topic : List[Literal['abort', 'minimilön', 'marijuanalegalisering', 'dödsstraff', 'kärnkraft', 'kloning']] = 'abort'
