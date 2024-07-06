@@ -4,7 +4,7 @@ from typing import List, Literal
 
 from datasets import get_dataset_config_info
 from sparv.api import Annotation, Output, annotator
-from transformers import pipeline
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 from .helpers import get_label_mapper
 
 
@@ -44,15 +44,26 @@ def argumentation(
 @annotator("Label the sentiment towards immigration on a continuous 1--5 scale", language="swe")
 def absabank_imm(
     sentence: Annotation = Annotation("<sentence>"),
-    out_sentiment: Output = Output("<sentence>:sbx_superlim.absabank_imm.sentiment"),
-    out_sentiment_certainty: Output = Output("<sentence>:sbx_superlim.absabank_imm.certainty"),
-    hf_model_path: str = "sbx/bert-base-swedish-cased-absabank_imm"
+    word: Annotation = Annotation("<token:word>"),
+    out_score: Output = Output("<sentence>:sbx_superlim.absabank-imm.score"),
+    hf_model_path: str = "sbx/bert-base-swedish-cased_absabank-imm"
 ):
-    raise NotImplementedError
-    pipe = pipeline("text-classification", model=hf_model_path)
-    output = pipe([s for s in sentence.read()])
-    out_sentiment.write([l for l in output['label']])
-    out_sentiment_certainty.write([str(o['score']) for o in output])
+    ds_config = get_dataset_config_info('sbx/superlim-2', 'absabank-imm')
+    sentences, _orphans = sentence.get_children(word)
+    token_word = list(word.read())
+    inputs : List[str] = []
+    for s in sentences:
+        s_words = []
+        for w_idx in s:
+            s_words.append(token_word[w_idx])
+        sentence_string = " ".join(s_words)
+        inputs.append(sentence_string)
+    tokenizer = AutoTokenizer.from_pretrained(hf_model_path)
+    model = AutoModelForSequenceClassification.from_pretrained(hf_model_path)
+    # TODO: Decide padding policy
+    model_outputs = model(**tokenizer(inputs, return_tensors='pt', truncation=True, padding=True))
+    scores = model_outputs.logits[:,0].tolist()
+    out_score.write([str(s) for s in scores])
 
 
 @annotator(
