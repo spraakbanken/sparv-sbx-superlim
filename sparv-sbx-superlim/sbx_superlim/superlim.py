@@ -3,9 +3,8 @@
 from typing import List, Literal
 
 from datasets import get_dataset_config_info
-from sparv.api import Annotation, Config, Output, annotator
+from sparv.api import Annotation, Output, annotator
 from transformers import pipeline
-
 from .helpers import get_label_mapper
 
 
@@ -18,12 +17,11 @@ def argumentation(
     word: Annotation = Annotation("<token:word>"),
     out_stance: Output = Output("<sentence>:sbx_superlim.argumentation.stance"),
     out_stance_certainty: Output = Output("<sentence>:sbx_superlim.argumentation.certainty"),
-    hf_model_path: str = "sbx/bert-base-swedish-cased-argumentation_sent",
+    hf_model_path: str = "sbx/bert-base-swedish-cased-argumentation_sent"
+):
     # TODO: figure out how to pass this as an argument
     topic : List[Literal['abort', 'minimilön', 'marijuanalegalisering', 'dödsstraff', 'kärnkraft', 'kloning']] = 'abort'
-):
     ds_config = get_dataset_config_info('sbx/superlim-2', 'argumentation_sent')
-    inputs = []
     sentences, _orphans = sentence.get_children(word)
     token_word = list(word.read())
     inputs : List[str] = []
@@ -63,14 +61,24 @@ def absabank_imm(
 )
 def dalaj_ged(
     sentence: Annotation = Annotation("<sentence>"),
+    word: Annotation = Annotation("<token:word>"),
     out_label : Output = Output("<sentence>:sbx_superlim.dalaj-ged.label"),
     out_certainty: Output = Output("<sentence>:sbx_superlim.dalaj-ged.certainty"),
     hf_model_path: str = "sbx/bert-base-swedish-cased_dalaj-ged"
 ):  
-    input = [s for s in sentence.read()]
+    ds_config = get_dataset_config_info('sbx/superlim-2', 'dalaj-ged')
+    sentences, _orphans = sentence.get_children(word)
+    token_word = list(word.read())
+    inputs : List[str] = []
+    for s in sentences:
+        s_words = []
+        for w_idx in s:
+            s_words.append(token_word[w_idx])
+        sentence_string = " ".join(s_words)
+        inputs.append(sentence_string)
     pipe = pipeline("text-classification", model=hf_model_path)
-    output = pipe(input)
-    label_mapper = get_label_mapper("dalaj-ged", pipe.model.config)
+    output = pipe(inputs)
+    label_mapper = get_label_mapper(ds_config, pipe.model.config)
     labels = [label_mapper[o['label']] for o in output]
     out_label.write(labels)
     out_certainty.write([str(o['score']) for o in output])
