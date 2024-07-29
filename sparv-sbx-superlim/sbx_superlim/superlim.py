@@ -5,6 +5,8 @@ from typing import List, Literal
 from datasets import get_dataset_config_info
 from sparv.api import Annotation, Output, annotator
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
+
+from .common import prepare_inputs
 from .helpers import get_label_mapper
 
 
@@ -22,17 +24,7 @@ def argumentation(
     # TODO: figure out how to pass this as an argument
     topic : List[Literal['abort', 'minimilön', 'marijuanalegalisering', 'dödsstraff', 'kärnkraft', 'kloning']] = 'abort'
     ds_config = get_dataset_config_info('sbx/superlim-2', 'argumentation_sent')
-    sentences, _orphans = sentence.get_children(word)
-    token_word = list(word.read())
-    inputs : List[str] = []
-    for s in sentences:
-        s_words = []
-        for w_idx in s:
-            s_words.append(token_word[w_idx])
-        sentence_string = " ".join(s_words)
-        # TODO: Temporary string formatting hack until training scripts and models are fixed
-        input_string = f"{sentence_string} $ {topic}"
-        inputs.append(input_string)
+    inputs = prepare_inputs(sentence, word, f" $ {topic}")
     pipe = pipeline("text-classification", model=hf_model_path)
     output = pipe(inputs)
     label_mapper = get_label_mapper(ds_config, pipe.model.config)
@@ -48,16 +40,7 @@ def absabank_imm(
     out_score: Output = Output("<sentence>:sbx_superlim.absabank-imm.score"),
     hf_model_path: str = "sbx/bert-base-swedish-cased_absabank-imm"
 ):
-    ds_config = get_dataset_config_info('sbx/superlim-2', 'absabank-imm')
-    sentences, _orphans = sentence.get_children(word)
-    token_word = list(word.read())
-    inputs : List[str] = []
-    for s in sentences:
-        s_words = []
-        for w_idx in s:
-            s_words.append(token_word[w_idx])
-        sentence_string = " ".join(s_words)
-        inputs.append(sentence_string)
+    inputs = prepare_inputs(sentence, word)
     tokenizer = AutoTokenizer.from_pretrained(hf_model_path)
     model = AutoModelForSequenceClassification.from_pretrained(hf_model_path)
     # TODO: Decide padding policy
@@ -76,17 +59,9 @@ def dalaj_ged(
     out_label : Output = Output("<sentence>:sbx_superlim.dalaj-ged.label"),
     out_certainty: Output = Output("<sentence>:sbx_superlim.dalaj-ged.certainty"),
     hf_model_path: str = "sbx/bert-base-swedish-cased_dalaj-ged"
-):  
+):
     ds_config = get_dataset_config_info('sbx/superlim-2', 'dalaj-ged')
-    sentences, _orphans = sentence.get_children(word)
-    token_word = list(word.read())
-    inputs : List[str] = []
-    for s in sentences:
-        s_words = []
-        for w_idx in s:
-            s_words.append(token_word[w_idx])
-        sentence_string = " ".join(s_words)
-        inputs.append(sentence_string)
+    inputs = prepare_inputs(sentence, word)
     pipe = pipeline("text-classification", model=hf_model_path)
     output = pipe(inputs)
     label_mapper = get_label_mapper(ds_config, pipe.model.config)
