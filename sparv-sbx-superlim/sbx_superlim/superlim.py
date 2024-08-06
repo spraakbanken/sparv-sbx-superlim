@@ -3,7 +3,7 @@
 from typing import List, Literal
 
 from datasets import get_dataset_config_info
-from sparv.api import Annotation, Config, Output, annotator
+from sparv.api import Annotation, Config, Output, Text, annotator
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 
 from .common import prepare_inputs
@@ -15,8 +15,8 @@ from .helpers import get_label_mapper
     language="swe"
 )
 def argumentation(
+    text : Text = Text(),
     sentence: Annotation = Annotation("<sentence>"),
-    word: Annotation = Annotation("<token:word>"),
     out_stance: Output = Output("<sentence>:sbx_superlim.argumentation.stance"),
     out_stance_certainty: Output = Output("<sentence>:sbx_superlim.argumentation.certainty"),
     hf_model_path: str = Config("sbx_superlim.hf_model_path.argumentation")
@@ -24,7 +24,7 @@ def argumentation(
     # TODO: figure out how to pass this as an argument
     topic : List[Literal['abort', 'minimilön', 'marijuanalegalisering', 'dödsstraff', 'kärnkraft', 'kloning']] = 'abort'
     ds_config = get_dataset_config_info('sbx/superlim-2', 'argumentation_sent')
-    inputs = prepare_inputs(sentence, word, f" $ {topic}")
+    inputs = prepare_inputs(text, sentence, f" $ {topic}")
     pipe = pipeline("text-classification", model=hf_model_path)
     output = pipe(inputs)
     label_mapper = get_label_mapper(ds_config, pipe.model.config)
@@ -35,12 +35,12 @@ def argumentation(
 
 @annotator("Label the sentiment towards immigration on a continuous 1--5 scale", language="swe")
 def absabank_imm(
+    text : Text = Text(),
     sentence: Annotation = Annotation("<sentence>"),
-    word: Annotation = Annotation("<token:word>"),
     out_score: Output = Output("<sentence>:sbx_superlim.absabank-imm.score"),
     hf_model_path: str = Config("sbx_superlim.hf_model_path.absabank-imm")
 ):
-    inputs = prepare_inputs(sentence, word)
+    inputs = prepare_inputs(text, sentence)
     tokenizer = AutoTokenizer.from_pretrained(hf_model_path)
     model = AutoModelForSequenceClassification.from_pretrained(hf_model_path)
     # TODO: Decide padding policy
@@ -54,14 +54,14 @@ def absabank_imm(
         language="swe"
 )
 def dalaj_ged(
+    text : Text = Text(),
     sentence: Annotation = Annotation("<sentence>"),
-    word: Annotation = Annotation("<token:word>"),
     out_label : Output = Output("<sentence>:sbx_superlim.dalaj-ged.label"),
     out_certainty: Output = Output("<sentence>:sbx_superlim.dalaj-ged.certainty"),
     hf_model_path: str = Config("sbx_superlim.hf_model_path.dalaj-ged")
 ):
     ds_config = get_dataset_config_info('sbx/superlim-2', 'dalaj-ged')
-    inputs = prepare_inputs(sentence, word)
+    inputs = prepare_inputs(text, sentence)
     pipe = pipeline("text-classification", model=hf_model_path)
     output = pipe(inputs)
     label_mapper = get_label_mapper(ds_config, pipe.model.config)
