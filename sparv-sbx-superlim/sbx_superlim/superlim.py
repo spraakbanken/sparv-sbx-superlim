@@ -3,7 +3,7 @@
 from typing import List, Literal
 
 from datasets import get_dataset_config_info
-from sparv.api import Annotation, Output, annotator
+from sparv.api import Annotation, Config, Output, annotator
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 
 from .common import prepare_inputs
@@ -19,7 +19,7 @@ def argumentation(
     word: Annotation = Annotation("<token:word>"),
     out_stance: Output = Output("<sentence>:sbx_superlim.argumentation.stance"),
     out_stance_certainty: Output = Output("<sentence>:sbx_superlim.argumentation.certainty"),
-    hf_model_path: str = "sbx/bert-base-swedish-cased_argumentation_sent"
+    hf_model_path: str = Config("sbx_superlim.hf_model_path.argumentation")
 ):
     # TODO: figure out how to pass this as an argument
     topic : List[Literal['abort', 'minimilön', 'marijuanalegalisering', 'dödsstraff', 'kärnkraft', 'kloning']] = 'abort'
@@ -38,7 +38,7 @@ def absabank_imm(
     sentence: Annotation = Annotation("<sentence>"),
     word: Annotation = Annotation("<token:word>"),
     out_score: Output = Output("<sentence>:sbx_superlim.absabank-imm.score"),
-    hf_model_path: str = "sbx/bert-base-swedish-cased_absabank-imm"
+    hf_model_path: str = Config("sbx_superlim.hf_model_path.absabank-imm")
 ):
     inputs = prepare_inputs(sentence, word)
     tokenizer = AutoTokenizer.from_pretrained(hf_model_path)
@@ -58,7 +58,7 @@ def dalaj_ged(
     word: Annotation = Annotation("<token:word>"),
     out_label : Output = Output("<sentence>:sbx_superlim.dalaj-ged.label"),
     out_certainty: Output = Output("<sentence>:sbx_superlim.dalaj-ged.certainty"),
-    hf_model_path: str = "sbx/bert-base-swedish-cased_dalaj-ged"
+    hf_model_path: str = Config("sbx_superlim.hf_model_path.dalaj-ged")
 ):
     ds_config = get_dataset_config_info('sbx/superlim-2', 'dalaj-ged')
     inputs = prepare_inputs(sentence, word)
