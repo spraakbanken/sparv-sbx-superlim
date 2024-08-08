@@ -1,9 +1,21 @@
 """Example for a custom annotator."""
 
+import os
+
 from typing import List, Literal
 
 from datasets import get_dataset_config_info
-from sparv.api import Annotation, AnnotationAllSourceFiles, AllSourceFilenames, Corpus, Config, Output, Text, annotator, exporter
+from sparv.api import (
+    Annotation,
+    AllSourceFilenames,
+    Config,
+    Export,
+    Output,
+    Text,
+    annotator,
+    exporter
+    )
+
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 
 from .common import prepare_inputs
@@ -119,7 +131,7 @@ def swewic(
     raise NotImplementedError("Sparv use case not yet defined.")
 
 
-def pair_files(filenames : AllSourceFilenames):
+def pair_files(filenames : AllSourceFilenames) -> List[tuple]:
     pairs : dict = {}
     for fn in filenames:
         stem, _, = fn.split('.')
@@ -130,19 +142,23 @@ def pair_files(filenames : AllSourceFilenames):
 @exporter("Determine the logical relation between two sentences", language="swe")
 def swenli(
     source_files: AllSourceFilenames = AllSourceFilenames(),
-    out_label : Output = Output("<sentence>:sbx_superlim.swenli.label"),
-    hf_model_path: str = Config("sbx_superlim.hf_model_path.swenli")
+    hf_model_path: str = Config("sbx_superlim.hf_model_path.swenli"),
+    out: Export = Export("<sentence>:sbx_superlim.swenli/labels.csv"),
 ):
     pairs = pair_files(source_files)
-    inputs = []
     for sf_sv, sf_en in pairs:
         prefix = 'source'
+        pair_inputs = []
         with open(f'{prefix}/{sf_sv}.txt') as f1, open(f'{prefix}/{sf_en}.txt') as f2:
             for line_sv, line_en in zip(f1.readlines(), f2.readlines()):
-                inputs.append(" ".join(line_sv + line_en))
+                pair_inputs.append(" ".join(line_sv + line_en))
+    # Temp
+    inputs = pair_inputs
     ds_config = get_dataset_config_info('sbx/superlim-2', 'swenli')
     pipe = pipeline("text-classification", model=hf_model_path)
     output = pipe(inputs)
     label_mapper = get_label_mapper(ds_config, pipe.model.config)
     labels = [label_mapper[o['label']] for o in output]
-    out_label.write(labels)
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    with open(out, "w") as f:
+        f.writelines([f"{l}\n" for l in labels])
