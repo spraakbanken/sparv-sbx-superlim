@@ -143,8 +143,9 @@ def pair_files(filenames : AllSourceFilenames) -> List[tuple]:
 def swenli(
     source_files: AllSourceFilenames = AllSourceFilenames(),
     hf_model_path: str = Config("sbx_superlim.hf_model_path.swenli"),
-    out: Export = Export("<sentence>:sbx_superlim.swenli/labels.csv"),
+    out: Export = Export("export/sbx_superlim.swenli/labels.txt"),
 ):
+    # TODO: make the exporter write one file per source file pair.
     pairs = pair_files(source_files)
     for sf_sv, sf_en in pairs:
         prefix = 'source'
