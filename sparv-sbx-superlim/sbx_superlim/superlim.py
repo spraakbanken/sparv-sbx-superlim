@@ -1,6 +1,7 @@
 """Example for a custom annotator."""
 
 import os
+import pandas as pd
 
 from typing import List, Literal
 
@@ -15,7 +16,6 @@ from sparv.api import (
     annotator,
     exporter
     )
-
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 
 from .common import prepare_inputs
@@ -136,6 +136,7 @@ def pair_files(filenames : AllSourceFilenames) -> List[tuple]:
     for fn in filenames:
         stem, _, = fn.split('.')
         pairs.setdefault(stem, []).append(fn)
+    assert [l1.split(".")[0] == l2.split(".")[1] for l1, l2 in pairs.values()]
     return [tuple(values) for values in pairs.values()]
 
 
@@ -143,23 +144,22 @@ def pair_files(filenames : AllSourceFilenames) -> List[tuple]:
 def swenli(
     source_files: AllSourceFilenames = AllSourceFilenames(),
     hf_model_path: str = Config("sbx_superlim.hf_model_path.swenli"),
-    out: Export = Export("export/sbx_superlim.swenli/labels.txt"),
+    out: Export = Export("sbx_superlim.swenli/predictions.tsv"),
 ):
-    # TODO: make the exporter write one file per source file pair.
     pairs = pair_files(source_files)
+    pair_predictions : dict = {}
     for sf_sv, sf_en in pairs:
         prefix = 'source'
-        pair_inputs = []
         with open(f'{prefix}/{sf_sv}.txt') as f1, open(f'{prefix}/{sf_en}.txt') as f2:
+            pair_inputs = []
             for line_sv, line_en in zip(f1.readlines(), f2.readlines()):
                 pair_inputs.append(" ".join(line_sv + line_en))
-    # Temp
-    inputs = pair_inputs
-    ds_config = get_dataset_config_info('sbx/superlim-2', 'swenli')
-    pipe = pipeline("text-classification", model=hf_model_path)
-    output = pipe(inputs)
-    label_mapper = get_label_mapper(ds_config, pipe.model.config)
-    labels = [label_mapper[o['label']] for o in output]
+            ds_config = get_dataset_config_info('sbx/superlim-2', 'swenli')
+            pipe = pipeline("text-classification", model=hf_model_path)
+            output = pipe(pair_inputs)
+            label_mapper = get_label_mapper(ds_config, pipe.model.config)
+            base = sf_sv.split(".")[0]
+            pair_predictions[f"{base}.label"] = [label_mapper[o['label']] for o in output]
+            pair_predictions[f"{base}.score"] = [o['score'] for o in output]
     os.makedirs(os.path.dirname(out), exist_ok=True)
-    with open(out, "w") as f:
-        f.writelines([f"{l}\n" for l in labels])
+    pd.DataFrame.from_records(pair_predictions).to_csv(out, sep='\t')
