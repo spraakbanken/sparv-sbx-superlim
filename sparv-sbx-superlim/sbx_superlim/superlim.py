@@ -18,7 +18,7 @@ from sparv.api import (
     )
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 
-from .common import prepare_inputs
+from .common import prepare_inputs, pair_files
 from .helpers import get_label_mapper
 
 
@@ -82,6 +82,56 @@ def dalaj_ged(
     out_certainty.write([str(o['score']) for o in output])
 
 
+@exporter("Determine the logical relation between two sentences", language="swe")
+def swenli(
+    source_files: AllSourceFilenames = AllSourceFilenames(),
+    hf_model_path: str = Config("sbx_superlim.hf_model_path.swenli"),
+    out: Export = Export("sbx_superlim.swenli/predictions.tsv"),
+):
+    pairs = pair_files(source_files)
+    pair_predictions : dict = {}
+    for sf_sv, sf_en in pairs:
+        prefix = 'source'
+        with open(f'{prefix}/{sf_sv}.txt') as f1, open(f'{prefix}/{sf_en}.txt') as f2:
+            pair_inputs = []
+            for line_sv, line_en in zip(f1.readlines(), f2.readlines()):
+                pair_inputs.append(" ".join(line_sv + line_en))
+            ds_config = get_dataset_config_info('sbx/superlim-2', 'swenli')
+            pipe = pipeline("text-classification", model=hf_model_path)
+            output = pipe(pair_inputs)
+            label_mapper = get_label_mapper(ds_config, pipe.model.config)
+            base = sf_sv.split(".")[0]
+            pair_predictions[f"{base}.label"] = [label_mapper[o['label']] for o in output]
+            pair_predictions[f"{base}.score"] = [o['score'] for o in output]
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    pd.DataFrame.from_records(pair_predictions).to_csv(out, sep='\t')
+
+
+@exporter("Determine the logical relation between two sentences", language="swe")
+def swepar(
+    source_files: AllSourceFilenames = AllSourceFilenames(),
+    hf_model_path: str = Config("sbx_superlim.hf_model_path.swepar"),
+    out: Export = Export("sbx_superlim.swepar/predictions.tsv"),
+):
+    pairs = pair_files(source_files)
+    pair_predictions : dict = {}
+    for sf_sv, sf_en in pairs:
+        prefix = 'source'
+        with open(f'{prefix}/{sf_sv}.txt') as f1, open(f'{prefix}/{sf_en}.txt') as f2:
+            pair_inputs = []
+            for line_sv, line_en in zip(f1.readlines(), f2.readlines()):
+                pair_inputs.append(" ".join(line_sv + line_en))
+            ds_config = get_dataset_config_info('sbx/superlim-2', 'swepar')
+            pipe = pipeline("text-classification", model=hf_model_path)
+            output = pipe(pair_inputs)
+            label_mapper = get_label_mapper(ds_config, pipe.model.config)
+            base = sf_sv.split(".")[0]
+            pair_predictions[f"{base}.label"] = [label_mapper[o['label']] for o in output]
+            pair_predictions[f"{base}.score"] = [o['score'] for o in output]
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    pd.DataFrame.from_records(pair_predictions).to_csv(out, sep='\t')
+
+
 @annotator("Determine how related two words are on a continuous scale from 0 to 10")
 def supersim_relatedness(
     tokens: Annotation = Annotation("<token>")
@@ -131,35 +181,3 @@ def swewic(
     raise NotImplementedError("Sparv use case not yet defined.")
 
 
-def pair_files(filenames : AllSourceFilenames) -> List[tuple]:
-    pairs : dict = {}
-    for fn in filenames:
-        stem, _, = fn.split('.')
-        pairs.setdefault(stem, []).append(fn)
-    assert [l1.split(".")[0] == l2.split(".")[1] for l1, l2 in pairs.values()]
-    return [tuple(values) for values in pairs.values()]
-
-
-@exporter("Determine the logical relation between two sentences", language="swe")
-def swenli(
-    source_files: AllSourceFilenames = AllSourceFilenames(),
-    hf_model_path: str = Config("sbx_superlim.hf_model_path.swenli"),
-    out: Export = Export("sbx_superlim.swenli/predictions.tsv"),
-):
-    pairs = pair_files(source_files)
-    pair_predictions : dict = {}
-    for sf_sv, sf_en in pairs:
-        prefix = 'source'
-        with open(f'{prefix}/{sf_sv}.txt') as f1, open(f'{prefix}/{sf_en}.txt') as f2:
-            pair_inputs = []
-            for line_sv, line_en in zip(f1.readlines(), f2.readlines()):
-                pair_inputs.append(" ".join(line_sv + line_en))
-            ds_config = get_dataset_config_info('sbx/superlim-2', 'swenli')
-            pipe = pipeline("text-classification", model=hf_model_path)
-            output = pipe(pair_inputs)
-            label_mapper = get_label_mapper(ds_config, pipe.model.config)
-            base = sf_sv.split(".")[0]
-            pair_predictions[f"{base}.label"] = [label_mapper[o['label']] for o in output]
-            pair_predictions[f"{base}.score"] = [o['score'] for o in output]
-    os.makedirs(os.path.dirname(out), exist_ok=True)
-    pd.DataFrame.from_records(pair_predictions).to_csv(out, sep='\t')

@@ -8,7 +8,8 @@ __config__ = [
     Config("sbx_superlim.hf_model_path.argumentation", "sbx/bert-base-swedish-cased_argumentation", description="HuggingFace model fine-tuned on argumentation_sent"),
     Config("sbx_superlim.hf_model_path.absabank-imm", "sbx/bert-base-swedish-cased_absabank-imm", description="HuggingFace model fine-tuned on absabank-imm"),
     Config("sbx_superlim.hf_model_path.dalaj-ged", "sbx/bert-base-swedish-cased_dalaj-ged", description="HuggingFace model fine-tuned on dalaj-ged"),
-    Config("sbx_superlim.hf_model_path.swenli", "sbx/bert-base-swedish-cased_swenli", description="HuggingFace model fine-tuned on swenli")
+    Config("sbx_superlim.hf_model_path.swenli", "sbx/bert-base-swedish-cased_swenli", description="HuggingFace model fine-tuned on swenli"),
+    Config("sbx_superlim.hf_model_path.swepar", "sbx/bert-base-swedish-cased_swepar", description="HuggingFace model fine-tuned on swepar")
 ]
 
 __description__ = "A Sparv plugin for classifying text using the Superlim baseline models."
