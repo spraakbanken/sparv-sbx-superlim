@@ -121,13 +121,12 @@ def swepar(
             pair_inputs = []
             for line_sv, line_en in zip(f1.readlines(), f2.readlines()):
                 pair_inputs.append(" ".join(line_sv + line_en))
-            ds_config = get_dataset_config_info('sbx/superlim-2', 'swepar')
-            pipe = pipeline("text-classification", model=hf_model_path)
-            output = pipe(pair_inputs)
-            label_mapper = get_label_mapper(ds_config, pipe.model.config)
+            model = AutoModelForSequenceClassification.from_pretrained(hf_model_path)
+            tokenizer = AutoTokenizer.from_pretrained(hf_model_path)
+            model_outputs = model(**tokenizer(pair_inputs, return_tensors='pt', truncation=True, padding=True))
+            output = model_outputs.logits[:,0].tolist()
             base = sf_sv.split(".")[0]
-            pair_predictions[f"{base}.label"] = [label_mapper[o['label']] for o in output]
-            pair_predictions[f"{base}.score"] = [o['score'] for o in output]
+            pair_predictions[f"{base}.score"] = [o for o in output]
     os.makedirs(os.path.dirname(out), exist_ok=True)
     pd.DataFrame.from_records(pair_predictions).to_csv(out, sep='\t')
 
