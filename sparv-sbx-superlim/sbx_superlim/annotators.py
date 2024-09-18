@@ -1,24 +1,23 @@
 """Example for a custom annotator."""
 
-import os
-import pandas as pd
-
 from typing import List, Literal
 
 from datasets import get_dataset_config_info
 from sparv.api import (
     Annotation,
-    AllSourceFilenames,
     Config,
-    Export,
     Output,
     Text,
-    annotator,
-    exporter
+    annotator
     )
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
+from transformers import (
+    AutoTokenizer, 
+    AutoModelForSequenceClassification,
+    TextClassificationPipeline, 
+    pipeline
+    )
 
-from .common import prepare_inputs, pair_files
+from .common import prepare_inputs
 from .helpers import get_label_mapper
 
 
@@ -31,7 +30,8 @@ def argumentation(
     sentence: Annotation = Annotation("<sentence>"),
     out_stance: Output = Output("<sentence>:sbx_superlim.argumentation.stance"),
     out_stance_certainty: Output = Output("<sentence>:sbx_superlim.argumentation.certainty"),
-    hf_model_path: str = Config("sbx_superlim.hf_model_path.argumentation")
+    hf_model_path: str = Config("sbx_superlim.hf_model_path.argumentation"),
+    hf_batch_size: int = Config("sbx_superlim.hf_inference_args.batch_size")
 ):
     # TODO: figure out how to pass this as an argument
     topic : List[Literal['abort', 'minimilön', 'marijuanalegalisering', 'dödsstraff', 'kärnkraft', 'kloning']] = 'abort'
@@ -45,20 +45,29 @@ def argumentation(
     out_stance_certainty.write([str(o['score']) for o in output])
 
 
+
+class ABSAbankPipeline(TextClassificationPipeline):
+    def postprocess(self, model_outputs):
+        best_class = model_outputs["logits"]
+        return best_class
+
+
 @annotator("Label the sentiment towards immigration on a continuous 1--5 scale", language="swe")
 def absabank_imm(
     text : Text = Text(),
     sentence: Annotation = Annotation("<sentence>"),
     out_score: Output = Output("<sentence>:sbx_superlim.absabank-imm.score"),
-    hf_model_path: str = Config("sbx_superlim.hf_model_path.absabank-imm")
+    hf_model_path: str = Config("sbx_superlim.hf_model_path.absabank-imm"),
+    hf_batch_size: int = Config("sbx_superlim.hf_inference_args.batch_size")
 ):
     inputs = prepare_inputs(text, sentence)
     tokenizer = AutoTokenizer.from_pretrained(hf_model_path)
     model = AutoModelForSequenceClassification.from_pretrained(hf_model_path)
     # TODO: Decide padding policy
-    model_outputs = model(**tokenizer(inputs, return_tensors='pt', truncation=True, padding=True))
-    scores = model_outputs.logits[:,0].tolist()
-    out_score.write([str(s) for s in scores])
+    pipe = ABSAbankPipeline(model=model, tokenizer=tokenizer)
+    model_outputs = pipe(inputs, batch_size=hf_batch_size)
+    scores = [str(float(o)) for o in model_outputs]
+    out_score.write(scores)
 
 
 @annotator(
@@ -70,16 +79,18 @@ def dalaj_ged(
     sentence: Annotation = Annotation("<sentence>"),
     out_label : Output = Output("<sentence>:sbx_superlim.dalaj-ged.label"),
     out_certainty: Output = Output("<sentence>:sbx_superlim.dalaj-ged.certainty"),
-    hf_model_path: str = Config("sbx_superlim.hf_model_path.dalaj-ged")
+    hf_model_path: str = Config("sbx_superlim.hf_model_path.dalaj-ged"),
+    hf_batch_size: int = Config("sbx_superlim.hf_inference_args.batch_size")
 ):
     ds_config = get_dataset_config_info('sbx/superlim-2', 'dalaj-ged')
     inputs = prepare_inputs(text, sentence)
     pipe = pipeline("text-classification", model=hf_model_path)
-    output = pipe(inputs)
+    output = pipe(inputs, batch_size = hf_batch_size)
     label_mapper = get_label_mapper(ds_config, pipe.model.config)
     labels = [label_mapper[o['label']] for o in output]
     out_label.write(labels)
     out_certainty.write([str(o['score']) for o in output])
+
 
 @annotator("Determine the logical relation between two sentences", language="swe")
 def swenli(
@@ -87,65 +98,17 @@ def swenli(
     sentence: Annotation = Annotation("<sentence>"),
     out_label : Output = Output("<sentence>:sbx_superlim.swenli.label"),
     out_certainty: Output = Output("<sentence>:sbx_superlim.swenli.certainty"),
-    hf_model_path: str = Config("sbx_superlim.hf_model_path.swenli")
+    hf_model_path: str = Config("sbx_superlim.hf_model_path.swenli"),
+    hf_batch_size: int = Config("sbx_superlim.hf_inference_args.batch_size")
 ):
     ds_config = get_dataset_config_info('sbx/superlim-2', 'swenli')
     inputs = prepare_inputs(text, sentence, input_type = 'sentence_pair')
     pipe = pipeline("text-classification", model=hf_model_path)
-    output = pipe(inputs)
+    output = pipe(inputs, batch_size=hf_batch_size)
     label_mapper = get_label_mapper(ds_config, pipe.model.config)
     labels = ["N/A"] + [label_mapper[o['label']] for o in output]
     out_label.write(labels)
     out_certainty.write(["N/A"] + [str(o['score']) for o in output])
-
-
-@exporter("Determine the logical relation between two sentences", language="swe")
-def swenli_parallel(
-    source_files: AllSourceFilenames = AllSourceFilenames(),
-    hf_model_path: str = Config("sbx_superlim.hf_model_path.swenli"),
-    out: Export = Export("sbx_superlim.swenli/predictions.tsv"),
-):
-    pairs = pair_files(source_files)
-    pair_predictions : dict = {}
-    for sf_sv, sf_en in pairs:
-        prefix = 'source'
-        with open(f'{prefix}/{sf_sv}.txt') as f1, open(f'{prefix}/{sf_en}.txt') as f2:
-            pair_inputs = []
-            for line_sv, line_en in zip(f1.readlines(), f2.readlines()):
-                pair_inputs.append(" ".join(line_sv + line_en))
-            ds_config = get_dataset_config_info('sbx/superlim-2', 'swenli')
-            pipe = pipeline("text-classification", model=hf_model_path)
-            output = pipe(pair_inputs)
-            label_mapper = get_label_mapper(ds_config, pipe.model.config)
-            base = sf_sv.split(".")[0]
-            pair_predictions[f"{base}.label"] = [label_mapper[o['label']] for o in output]
-            pair_predictions[f"{base}.score"] = [o['score'] for o in output]
-    os.makedirs(os.path.dirname(out), exist_ok=True)
-    pd.DataFrame.from_records(pair_predictions).to_csv(out, sep='\t')
-
-
-@exporter("Determine the logical relation between two sentences", language="swe")
-def swepar_parallel(
-    source_files: AllSourceFilenames = AllSourceFilenames(),
-    hf_model_path: str = Config("sbx_superlim.hf_model_path.swepar"),
-    out: Export = Export("sbx_superlim.swepar/predictions.tsv"),
-):
-    pairs = pair_files(source_files)
-    pair_predictions : dict = {}
-    for sf_sv, sf_en in pairs:
-        prefix = 'source'
-        with open(f'{prefix}/{sf_sv}.txt') as f1, open(f'{prefix}/{sf_en}.txt') as f2:
-            pair_inputs = []
-            for line_sv, line_en in zip(f1.readlines(), f2.readlines()):
-                pair_inputs.append(" ".join(line_sv + line_en))
-            model = AutoModelForSequenceClassification.from_pretrained(hf_model_path)
-            tokenizer = AutoTokenizer.from_pretrained(hf_model_path)
-            model_outputs = model(**tokenizer(pair_inputs, return_tensors='pt', truncation=True, padding=True))
-            output = model_outputs.logits[:,0].tolist()
-            base = sf_sv.split(".")[0]
-            pair_predictions[f"{base}.score"] = [o for o in output]
-    os.makedirs(os.path.dirname(out), exist_ok=True)
-    pd.DataFrame.from_records(pair_predictions).to_csv(out, sep='\t')
 
 
 @annotator("Determine how related two words are on a continuous scale from 0 to 10")
