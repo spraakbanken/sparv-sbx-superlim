@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-from typing import Optional
+from pathlib import Path
 
 from datasets import get_dataset_config_info
 
@@ -24,33 +24,43 @@ from .common import pair_files
 from .helpers import get_label_mapper
 
 
-@exporter("Summarizes sentence-level classifications", language="swe")
+@exporter("Saves sentence-wise predictions to a .tsv for further analysis", language="swe")
 def predictions(
     source_files: AllSourceFilenames = AllSourceFilenames(),
     annotation_source_sentences: AnnotationAllSourceFiles = AnnotationAllSourceFiles("<sentence>"),
-    annotation_source_scores: AnnotationAllSourceFiles = AnnotationAllSourceFiles("<sentence>:sbx_superlim.absabank-imm.score"),
+    annotation_migration_stance: AnnotationAllSourceFiles = AnnotationAllSourceFiles("<sentence>:sbx_superlim.absabank-imm.score"),
+    annotation_nuclear_stance: AnnotationAllSourceFiles = AnnotationAllSourceFiles("<sentence>:sbx_superlim.argumentation.stance"),
+    annotation_nuclear_certainty: AnnotationAllSourceFiles = AnnotationAllSourceFiles("<sentence>:sbx_superlim.argumentation.certainty"),
     # Add these to label files too!
-    annotation_source_arg_labels: AnnotationAllSourceFiles = AnnotationAllSourceFiles("<sentence>:sbx_superlim.argumentation.label"),
-    annotation_source_dalaj_labels: AnnotationAllSourceFiles = AnnotationAllSourceFiles("<sentence>:sbx_superlim.dalaj-ged.label"),
     out: Export = Export("sbx_superlim.predictions/summary.tsv")
 ):
     rows = []
     for sf in source_files:
         text = Text(sf).read()
         party, year, _ = sf.split('-', maxsplit=2)
-        scores = [float(s) for s in annotation_source_scores.read(sf)]
+        migration_stances = [float(s) for s in annotation_migration_stance.read(sf)]
+        nuclear_stances = [s for s in annotation_nuclear_stance.read(sf)]
+        nuclear_certainty = [c for c in annotation_nuclear_certainty.read(sf)]
         text = Text(sf).read()
         sentences = [text[start: end] for start, end in annotation_source_sentences.read_spans(sf)]
-        pd.DataFrame({'sentence': sentences, 'prediction': scores}).to_csv(f'export/sbx_superlim.stats/{sf}.tsv', sep='\t')
-        n_sents = len(scores)
-        mean = sum(scores) / len(scores) if n_sents > 0 else 0
+        pred_fn = f'export/sbx_superlim.predictions/{sf}.tsv'
+        output_dir = Path(pred_fn).parent
+        output_dir.mkdir(parents=True, exist_ok=True)
+        pd.DataFrame({
+            'sentence': sentences, 
+            'migration_stance': migration_stances, 
+            'nuclear_stance': nuclear_stances,
+            'nuclear_certainty': nuclear_certainty
+        }).to_csv(pred_fn, sep='\t', index=False)
+        n_sents = len(migration_stances)
+        mean = sum(migration_stances) / len(migration_stances) if n_sents > 0 else 0
         row = [sf, party, year, mean, n_sents]
         rows.append(row)
     os.makedirs(os.path.dirname(out), exist_ok=True)
     pd.DataFrame\
         .from_records(rows, columns = ['source_file', 'party', 'year', 'score', 'n_sents'])\
         .sort_values('source_file')\
-        .to_csv(out, sep='\t')
+        .to_csv(out, sep='\t', index=False)
 
 @exporter("Determine the logical relation between two sentences", language="swe")
 def swenli_parallel(

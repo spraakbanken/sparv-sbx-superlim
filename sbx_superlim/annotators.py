@@ -25,7 +25,7 @@ from .helpers import get_label_mapper
     "Identify the stance towards a given topic", 
     language="swe"
 )
-def argumentation(
+def argumentation_sentences_stance(
     text : Text = Text(),
     sentence: Annotation = Annotation("<sentence>"),
     out_stance: Output = Output("<sentence>:sbx_superlim.argumentation.stance"),
@@ -34,9 +34,9 @@ def argumentation(
     hf_batch_size: int = Config("sbx_superlim.hf_inference_args.batch_size")
 ):
     # TODO: figure out how to pass this as an argument
-    topic : List[Literal['abort', 'minimilön', 'marijuanalegalisering', 'dödsstraff', 'kärnkraft', 'kloning']] = 'abort'
+    topic : List[Literal['abort', 'minimilön', 'marijuanalegalisering', 'dödsstraff', 'kärnkraft', 'kloning']] = 'kärnkraft'
     ds_config = get_dataset_config_info('sbx/superlim-2', 'argumentation_sent')
-    inputs = prepare_inputs(text, sentence, f" $ {topic}")
+    inputs = prepare_inputs(text, sentence, f" [SEP] {topic}") # TODO: Change [SEP] token depending on model.
     pipe = pipeline("text-classification", model=hf_model_path)
     output = pipe(inputs)
     label_mapper = get_label_mapper(ds_config, pipe.model.config)
