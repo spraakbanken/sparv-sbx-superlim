@@ -28,9 +28,9 @@ from .helpers import get_label_mapper
 def predictions(
     source_files: AllSourceFilenames = AllSourceFilenames(),
     annotation_source_sentences: AnnotationAllSourceFiles = AnnotationAllSourceFiles("<sentence>"),
-    annotation_migration_stance: AnnotationAllSourceFiles = AnnotationAllSourceFiles("<sentence>:sbx_superlim.absabank-imm.score"),
-    annotation_nuclear_stance: AnnotationAllSourceFiles = AnnotationAllSourceFiles("<sentence>:sbx_superlim.argumentation.stance"),
-    annotation_nuclear_certainty: AnnotationAllSourceFiles = AnnotationAllSourceFiles("<sentence>:sbx_superlim.argumentation.certainty"),
+    annotation_migration_stance: AnnotationAllSourceFiles = AnnotationAllSourceFiles("<sentence>:sbx_superlim.migration_stance"),
+    annotation_nuclear_stance: AnnotationAllSourceFiles = AnnotationAllSourceFiles("<sentence>:sbx_superlim.nuclear_stance"),
+    annotation_nuclear_certainty: AnnotationAllSourceFiles = AnnotationAllSourceFiles("<sentence>:sbx_superlim.nuclear_stance.certainty"),
     # Add these to label files too!
     out: Export = Export("sbx_superlim.predictions/summary.tsv")
 ):
