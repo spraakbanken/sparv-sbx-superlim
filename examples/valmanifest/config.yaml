@@ -17,11 +17,11 @@ export:
   annotations:
     - <token>
     - <sentence>
-    - <sentence>:sbx_superlim.absabank-imm.score
-    - <sentence>:sbx_superlim.argumentation.stance
+    - <sentence>:sbx_superlim.migration_stance
+    - <sentence>:sbx_superlim.nuclear_stance
 sbx_superlim:
   hf_model_path:
     absabank-imm: 'sbx/KB-bert-base-swedish-cased_absabank-imm'
-    absabank-imm: 'sbx/KB-bert-base-swedish-argumentation_sent'
+    argumentation: 'sbx/KB-bert-base-swedish-argumentation_sent'
   hf_inference_args:
     batch_size: 32
