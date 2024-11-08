@@ -46,6 +46,8 @@ sbx_superlim:
 
 Plugin-specicific variables which start with ```hf``` are HuggingFace parameters. The most important one is the ```hf_model_path``` which tells which fine-tuned model to use for each task.
 
+Full working examples can be found in the ```examples``` folder.
+
 # Available annotations
 
 So far, Sparv-Superlim provides 10 different annotations. These are summarized in the table below:
