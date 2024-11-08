@@ -1,6 +1,12 @@
 """A Sparv plugin for classifying text using the Superlim baseline models."""
 from sparv.api import Config
-from . import annotators, exporters
+from .annotators import (
+    absabank_imm,
+    argumentation_sent,
+    dalaj_ged,
+    swenli
+    )
+from . import exporters
 
 __config__ = [
     # TODO: Split this variable into many different variables according to superlim task
