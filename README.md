@@ -1,6 +1,6 @@
 # Sparv-Superlim: A plugin for classifying text using the models trained on tasks in Superlim
 
-Sparv-Superlim is a Sparv plugin for classifying text using the Superlim baseline models. Superlim is a multi-task benchmark for Swedish, which includes baseline models.
+Sparv-Superlim is a [Sparv](https://github.com/spraakbanken/sparv-pipeline) plugin for classifying text using the Superlim baseline models. Superlim is a multi-task benchmark for Swedish, which includes baseline models.
 
 # How to use?
 
