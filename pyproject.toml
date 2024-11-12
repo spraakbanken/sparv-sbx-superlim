@@ -1,8 +1,12 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 [project]
 name = "sparv-sbx-superlim"
 version = "0.1.0"
 description = "A Sparv plugin for classifying text using the Superlim baseline models "
 readme = "README.md"
+requires-python = ">=3.9"
 license.text = "The GNU General Public License v3.0"
  authors = [
      { name = "Felix Morger", email = "felix.morger@gu.se" }
@@ -13,3 +17,6 @@ dependencies = [
     "datasets~=2.20.0"
 ]
 entry-points."sparv.plugin" = { sbx_superlim = "sbx_superlim" }
+
+[tool.hatch]
+build.include = ["/sbx_superlim"]
