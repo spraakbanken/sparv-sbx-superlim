@@ -68,8 +68,8 @@ Do you have new, innovative ways of incorporating models trained on Superlim int
 
 # How to cite?
 
-Please cite the following technical report: *Felix Morger. 2024. When Sparv met Superlim…A Sparv plugin for natural
-language understanding analysis of Swedish. Tech. rep. University of Gothenburg*. You can also use the bibtex entry below.
+Please cite the following technical report: *Felix Morger. 2024. [When Sparv met Superlim…A Sparv plugin for natural
+language understanding analysis of Swedish](https://hdl.handle.net/2077/83664). Tech. rep. University of Gothenburg*. You can also use the bibtex entry below.
 
 
 ```
