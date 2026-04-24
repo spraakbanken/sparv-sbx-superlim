@@ -14,14 +14,22 @@ export:
   default:
     - xml_export:pretty
     - sbx_superlim:predictions
+    # - sbx_superlim:swenli_parallel
+    # - sbx_superlim:swepar_parallel
   annotations:
     - <token>
     - <sentence>
     - <sentence>:sbx_superlim.migration_stance
     - <sentence>:sbx_superlim.nuclear_stance
+    - <sentence>:sbx_superlim.dalaj-ged.label
+    - <sentence>:sbx_superlim.dalaj-ged.certainty
+    - <sentence>:sbx_superlim.swenli.label
+    - <sentence>:sbx_superlim.swenli.certainty
 sbx_superlim:
   hf_model_path:
-    absabank-imm: 'sbx/KB-bert-base-swedish-cased_absabank-imm'
-    argumentation: 'sbx/KB-bert-base-swedish-argumentation_sent'
+    absabank-imm: "sbx/KB-bert-base-swedish-cased_absabank-imm"
+    argumentation: "sbx/KB-bert-base-swedish-cased_argumentation_sent"
+    dalaj-ged: "sbx/bert-base-swedish-cased_dalaj-ged"
+    swenli: "sbx/bert-base-swedish-cased_swenli"
   hf_inference_args:
     batch_size: 32

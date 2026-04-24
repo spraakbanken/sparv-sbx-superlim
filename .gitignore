@@ -1,0 +1,21 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Test files
+.coverage
+coverage.lcov
+coverage.xml
+
+## Example files
+/examples/**/export
+/examples/**/logs
+/examples/**/.snakemake
+/examples/**/sparv-workdir

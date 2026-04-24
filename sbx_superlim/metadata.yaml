@@ -1,0 +1,400 @@
+id: sbx-swe-superlim-parent
+abstract: true
+language_codes:
+  - swe
+keywords:
+  - transformers
+  - huggingface
+  - superlim
+tools:
+  - name: "transformers"
+    url: "https://github.com/huggingface/transformers"
+    license: "Apache-2.0"
+type: analysis
+analysis_unit: sentence
+other_references:
+  - "Repository: https://github.com/spraakbanken/sparv-sbx-superlim"
+---
+id: sbx-swe-migration_stance-transformers-superlim2
+parent: sbx-swe-superlim-parent
+short_description:
+  swe: Annoterar inställning gentemot immigration på en skala
+  eng: Label the sentiment towards immigration on a continuous scale
+task: migration stance
+type: analysis
+analysis_unit: sentence
+annotations:
+  - <sentence>:sbx_superlim.migration_stance
+example_output: |-
+  ```xml
+  <sentence migration_stance="4.854378700256348">
+    <token>Ett</token>
+    <token>öppet</token>
+    <token>Sverige</token>
+    <token>Vi</token>
+    <token>lever</token>
+    <token>i</token>
+    <token>en</token>
+    <token>orolig</token>
+    <token>tid</token>
+    <token>,</token>
+    <token>där</token>
+    <token>människor</token>
+    <token>tvingas</token>
+    <token>fly</token>
+    <token>för</token>
+    <token>sina</token>
+    <token>liv</token>
+    <token>från</token>
+    <token>krig</token>
+    <token>och</token>
+    <token>förtryck</token>
+    <token>.</token>
+  </sentence>
+  <sentence migration_stance="3.4953160285949707">
+    <token>Inte</token>
+    <token>sedan</token>
+    <token>Andra</token>
+    <token>världskriget</token>
+    <token>har</token>
+    <token>så</token>
+    <token>många</token>
+    <token>människor</token>
+    <token>varit</token>
+    <token>på</token>
+    <token>flykt</token>
+    <token>.</token>
+  </sentence>
+  ```
+models:
+  - name: "Svensk ABSAbank-Imm 1.1"
+    url: "https://spraakbanken.gu.se/resurser/absabank-imm"
+    description: "Also see https://huggingface.co/datasets/sbx/superlim-2"
+    license: CC-BY 4.0
+---
+id: sbx-swe-abortion_stance-transformers-superlim2
+parent: sbx-swe-superlim-parent
+short_description:
+  swe: Identifiera inställningen gentemot abort
+  eng: Identify the stance towards abortion
+task: abortion stance
+type: analysis
+analysis_unit: sentence
+annotations:
+  - <sentence>:sbx_superlim.abortion_stance
+  - <sentence>:sbx_superlim.abortion_stance.certainty
+models:
+  - name: "Argumentation sentences 1.0 topic='abortion'"
+    url: "https://spraakbanken.gu.se/resurser/argumentation-sentences"
+    description: "Also see https://huggingface.co/datasets/sbx/superlim-2"
+    license: CC-BY 4.0
+---
+id: sbx-swe-cloning_stance-transformers-superlim2
+parent: sbx-swe-superlim-parent
+short_description:
+  swe: Identifiera inställningen gentemot kloning
+  eng: Identify the stance towards cloning
+task: cloning stance
+type: analysis
+analysis_unit: sentence
+annotations:
+  - <sentence>:sbx_superlim.cloning_stance
+  - <sentence>:sbx_superlim.cloning_stance.certainty
+models:
+  - name: "Argumentation sentences 1.0 topic='cloning'"
+    url: "https://spraakbanken.gu.se/resurser/argumentation-sentences"
+    description: "Also see https://huggingface.co/datasets/sbx/superlim-2"
+    license: CC-BY 4.0
+---
+id: sbx-swe-death_penalty_stance-transformers-superlim2
+parent: sbx-swe-superlim-parent
+short_description:
+  swe: Identifiera inställningen gentemot dödsstraff
+  eng: Identify the stance towards death penalty
+task: death penalty stance
+type: analysis
+analysis_unit: sentence
+annotations:
+  - <sentence>:sbx_superlim.death_penalty_stance
+  - <sentence>:sbx_superlim.death_penalty_stance.certainty
+models:
+  - name: "Argumentation sentences 1.0 topic='death_penalty'"
+    url: "https://spraakbanken.gu.se/resurser/argumentation-sentences"
+    description: "Also see https://huggingface.co/datasets/sbx/superlim-2"
+    license: CC-BY 4.0
+---
+id: sbx-swe-marijuana_legalization_stance-transformers-superlim2
+parent: sbx-swe-superlim-parent
+short_description:
+  swe: Identifiera inställningen gentemot marijuanalegalisering
+  eng: Identify the stance towards marijuana legalization
+task: marijuana legalization stance
+type: analysis
+analysis_unit: sentence
+annotations:
+  - <sentence>:sbx_superlim.marijuana_legalization_stance
+  - <sentence>:sbx_superlim.marijuana_legalization_stance.certainty
+models:
+  - name: "Argumentation sentences 1.0 topic='marijuana_legalization'"
+    url: "https://spraakbanken.gu.se/resurser/argumentation-sentences"
+    description: "Also see https://huggingface.co/datasets/sbx/superlim-2"
+    license: CC-BY 4.0
+---
+id: sbx-swe-minimum_wage_stance-transformers-superlim2
+parent: sbx-swe-superlim-parent
+short_description:
+  swe: Identifiera inställningen gentemot minimilön
+  eng: Identify the stance towards minimum wage
+task: minimum wage stance
+type: analysis
+analysis_unit: sentence
+annotations:
+  - <sentence>:sbx_superlim.minimum_wage_stance
+  - <sentence>:sbx_superlim.minimum_wage_stance.certainty
+models:
+  - name: "Argumentation sentences 1.0 topic='minimum_wage'"
+    url: "https://spraakbanken.gu.se/resurser/argumentation-sentences"
+    description: "Also see https://huggingface.co/datasets/sbx/superlim-2"
+    license: CC-BY 4.0
+---
+id: sbx-swe-nuclear_stance-transformers-superlim2
+parent: sbx-swe-superlim-parent
+task: nuclear stance
+short_description:
+  swe: Identifiera inställningen gentemot kärnkraft
+  eng: Identify the stance towards nuclear power
+type: analysis
+analysis_unit: sentence
+annotations:
+  - <sentence>:sbx_superlim.nuclear_stance
+  - <sentence>:sbx_superlim.nuclear_stance.certainty
+example_output: |-
+  ```xml
+  <sentence nuclear_stance="pro">
+    <token>Ett</token>
+    <token>öppet</token>
+    <token>Sverige</token>
+    <token>Vi</token>
+    <token>lever</token>
+    <token>i</token>
+    <token>en</token>
+    <token>orolig</token>
+    <token>tid</token>
+    <token>,</token>
+    <token>där</token>
+    <token>människor</token>
+    <token>tvingas</token>
+    <token>fly</token>
+    <token>för</token>
+    <token>sina</token>
+    <token>liv</token>
+    <token>från</token>
+    <token>krig</token>
+    <token>och</token>
+    <token>förtryck</token>
+    <token>.</token>
+  </sentence>
+  <sentence nuclear_stance="non">
+    <token>Inte</token>
+    <token>sedan</token>
+    <token>Andra</token>
+    <token>världskriget</token>
+    <token>har</token>
+    <token>så</token>
+    <token>många</token>
+    <token>människor</token>
+    <token>varit</token>
+    <token>på</token>
+    <token>flykt</token>
+    <token>.</token>
+  </sentence>
+  ```
+models:
+  - name: "Argumentation sentences 1.0 topic='nuclear'"
+    url: "https://spraakbanken.gu.se/resurser/argumentation-sentences"
+    description: "Also see https://huggingface.co/datasets/sbx/superlim-2"
+    license: CC-BY 4.0
+---
+id: sbx-swe-correct_swedish-transformers-superlim2
+parent: sbx-swe-superlim-parent
+short_description:
+  swe: Avgör om en mening är korrekt svenska eller inte
+  eng: Determine whether a sentence is correct Swedish or not
+task: correct swedish label
+type: analysis
+analysis_unit: sentence
+annotations:
+  - <sentence>:sbx_superlim.dalaj-ged.label
+  - <sentence>:sbx_superlim.dalaj-ged.certainty
+example_output: |-
+  ```xml
+  <sentence dalaj-ged.certainty="0.8721855878829956" dalaj-ged.label="correct">
+    <token>Ett</token>
+    <token>öppet</token>
+    <token>Sverige</token>
+    <token>Vi</token>
+    <token>lever</token>
+    <token>i</token>
+    <token>en</token>
+    <token>orolig</token>
+    <token>tid</token>
+    <token>,</token>
+    <token>där</token>
+    <token>människor</token>
+    <token>tvingas</token>
+    <token>fly</token>
+    <token>för</token>
+    <token>sina</token>
+    <token>liv</token>
+    <token>från</token>
+    <token>krig</token>
+    <token>och</token>
+    <token>förtryck</token>
+    <token>.</token>
+  </sentence>
+  <sentence dalaj-ged.certainty="0.8851249814033508" dalaj-ged.label="incorrect">
+    <token>Inte</token>
+    <token>sedan</token>
+    <token>Andra</token>
+    <token>världskriget</token>
+    <token>har</token>
+    <token>så</token>
+    <token>många</token>
+    <token>människor</token>
+    <token>varit</token>
+    <token>på</token>
+    <token>flykt</token>
+    <token>.</token>
+  </sentence>
+  ```
+models:
+  - name: "DaLAJ-GED-Superlim 2.0"
+    url: "https://spraakbanken.gu.se/resurser/dalaj-ged-superlim"
+    description: "Also see https://huggingface.co/datasets/sbx/superlim-2"
+    license: CC-BY 4.0
+---
+id: sbx-swe-sentence_relation-transformers-superlim2
+parent: sbx-swe-superlim-parent
+short_description:
+  swe: Bestäm den logiska relationen mellan två meningar
+  eng: Determine the logical relation between two sentences
+task: relation between two sentences
+type: analysis
+analysis_unit: sentence
+annotations:
+  - <sentence>:sbx_superlim.swenli.label
+  - <sentence>:sbx_superlim.swenli.certainty
+example_output: |-
+  ```xml
+  <sentence swenli.certainty="N/A" swenli.label="N/A">
+    <token>Ett</token>
+    <token>öppet</token>
+    <token>Sverige</token>
+    <token>Vi</token>
+    <token>lever</token>
+    <token>i</token>
+    <token>en</token>
+    <token>orolig</token>
+    <token>tid</token>
+    <token>,</token>
+    <token>där</token>
+    <token>människor</token>
+    <token>tvingas</token>
+    <token>fly</token>
+    <token>för</token>
+    <token>sina</token>
+    <token>liv</token>
+    <token>från</token>
+    <token>krig</token>
+    <token>och</token>
+    <token>förtryck</token>
+    <token>.</token>
+  </sentence>
+  <sentence swenli.certainty="0.663418173789978" swenli.label="contradiction">
+    <token>Inte</token>
+    <token>sedan</token>
+    <token>Andra</token>
+    <token>världskriget</token>
+    <token>har</token>
+    <token>så</token>
+    <token>många</token>
+    <token>människor</token>
+    <token>varit</token>
+    <token>på</token>
+    <token>flykt</token>
+    <token>.</token>
+  </sentence>
+  ```
+models:
+  - name: "SweNLI 1.0"
+    url: "https://spraakbanken.gu.se/resurser/swenli"
+    description: "Also see https://huggingface.co/datasets/sbx/superlim-2"
+    license: CC-BY 4.0
+---
+id: sbx-swe-stance_prediction_exporter-transformers-superlim2
+parent: sbx-swe-superlim-parent
+short_description:
+  swe: Exportera meningsvisa prediktioner av inställningar mot migration och kärnkraft
+  eng: Export sentence-wise predictions on stances against migration and nuclear power
+task: stance prediction exporter
+type: utility
+example_output: |-
+  File summary.tsv:
+  ```tsv
+  source_file	party	year	score	n_sents
+  energy/fp-2014-v	energy/fp	2014	3.508478759567519	414
+  energy/l-2018-v	energy/l	2018	3.29210527288089	636
+  energy/l-2022-v	energy/l	2022	3.2610984318251903	533
+  energy/mp-2014-v	energy/mp	2014	3.4923595587412515	459
+  energy/mp-2018-v	energy/mp	2018	3.6043202685689204	461
+  energy/mp-2022-v	energy/mp	2022	3.4847448472976685	250
+  migration/all-2014-v-migration	migration/all	2014	3.557620108127594	80
+  migration/m-2018-v-migration	migration/m	2018	3.336945112546285	90
+  migration/m-2022-v-migration	migration/m	2022	2.9296604781537443	37
+  migration/sd-2014-v-migration	migration/sd	2014	3.277942384992327	14
+  migration/sd-2018-v-migration	migration/sd	2018	3.1405968458756157	23
+  migration/sd-2022-v-migration	migration/sd	2022	3.0594207231815043	26
+  ```
+
+  File migration/all-2014-v-migration.tsv:
+  ```tsv
+  sentence	migration_stance	nuclear_stance	nuclear_certainty
+  "Ett öppet Sverige
+
+  Vi lever i en orolig tid, där människor tvingas fly för sina liv från krig och förtryck."	4.854378700256348	pro	0.999983549118042
+  Inte sedan Andra världskriget har så många människor varit på flykt.	3.4953160285949707	non	0.998802661895752
+  Från militanta islamister i Irak och från ett Syrien i rasande inbördeskrig.	3.260589838027954	non	0.9999856948852539
+  Många människor väljer att söka sig till vårt land.	4.310279369354248	pro	0.9999514818191528
+  Alliansregeringen har, tillsammans med Miljöpartiet, valt en annan väg än den som många andra europeiska länder har valt.	3.4913580417633057	non	0.999992847442627
+  ```
+
+  File energy/mp-2022-v.tsv:
+  ```tsv
+  sentence	migration_stance	nuclear_stance	nuclear_certainty
+  "Valmanifest 2022
+  Alla ska med när Sverige ställer om
+
+  Vi är Miljöpartiet de gröna."	4.152757167816162	non	0.9999934434890747
+  Vi strävar efter en värld där alla kan leva goda liv utan att försämra villkoren för kommande generationer.	4.68739652633667	pro	0.9999898672103882
+  Det är det vi menar med att vara gröna.	3.0790042877197266	non	0.9999932050704956
+  Vi är en röst för dem som inte kan göra sina röster hörda.	4.782279014587402	non	0.9999873638153076
+  ```
+sparv_processor: sbx_superlim:predictions
+---
+id: sbx-swe-logical_relations_exporter-transformers-superlim2_swenli
+parent: sbx-swe-superlim-parent
+short_description:
+  swe: Exportera prediktionerna av den logiska relationerna mellan två meningar
+  eng: Export the predictions of the logical relation between two sentences
+task: logical relations exporter
+type: utility
+sparv_processor: sbx_superlim:swenli_parallel
+---
+id: sbx-swe-logical_relations_exporter-transformers-superlim2_swepar
+parent: sbx-swe-superlim-parent
+short_description:
+  swe: Exportera prediktionerna av den logiska relationerna mellan två meningar
+  eng: Export the predictions of the logical relation between two sentences
+task: logical relations exporter
+type: utility
+sparv_processor: sbx_superlim:swepar_parallel
